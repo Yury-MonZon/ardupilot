@@ -1683,6 +1683,17 @@ void AP_OSD_Screen::draw_speed(uint8_t x, uint8_t y, float angle_rad, float magn
     }
 }
 
+void AP_OSD_Screen::draw_windspeed(uint8_t x, uint8_t y, float angle_rad, float magnitude)
+{
+    int32_t angle_cd = angle_rad * DEGX100;
+    char arrow = get_arrow_font_index(angle_cd);
+    if (u_scale(VSPEED, magnitude) < 9.95) {
+        backend->write(x, y, false, "%c %1.1f%c", arrow, u_scale(VSPEED, magnitude), u_icon(VSPEED));
+    } else {
+        backend->write(x, y, false, "%c%3d%c", arrow, (int)roundf(u_scale(VSPEED, magnitude)), u_icon(VSPEED));
+    }
+}
+
 void AP_OSD_Screen::draw_gspeed(uint8_t x, uint8_t y)
 {
     AP_AHRS &ahrs = AP::ahrs();
@@ -1949,7 +1960,7 @@ void AP_OSD_Screen::draw_wind(uint8_t x, uint8_t y)
         }
         angle = angle + atan2f(v.y, v.x) - ahrs.get_yaw();
     } 
-    draw_speed(x + 1, y, angle, length);
+    draw_windspeed(x + 1, y, angle, length);
 
 #else
     const AP_WindVane* windvane = AP_WindVane::get_singleton();

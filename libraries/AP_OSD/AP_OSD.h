@@ -301,6 +301,7 @@ private:
 #endif
     //helper functions
     void draw_speed(uint8_t x, uint8_t y, float angle_rad, float magnitude);
+    void draw_windspeed(uint8_t x, uint8_t y, float angle_rad, float magnitude);
     void draw_distance(uint8_t x, uint8_t y, float distance);
     char get_arrow_font_index (int32_t angle_cd);
 #if HAL_WITH_ESC_TELEM
