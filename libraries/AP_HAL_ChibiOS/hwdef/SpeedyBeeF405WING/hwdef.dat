@@ -174,7 +174,6 @@ include ../include/minimize_fpv_osd.inc
 undef AP_CAMERA_MOUNT_ENABLED
 undef HAL_MOUNT_ENABLED
 undef HAL_MOUNT_SERVO_ENABLED
-undef QAUTOTUNE_ENABLED
 
 define AP_CAMERA_MOUNT_ENABLED 0
 
