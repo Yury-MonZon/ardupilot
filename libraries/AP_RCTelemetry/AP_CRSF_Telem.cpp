@@ -340,7 +340,7 @@ void AP_CRSF_Telem::disable_tx_entries()
     disable_scheduler_entry(BARO_VARIO);
     disable_scheduler_entry(VARIO);
     disable_scheduler_entry(BATTERY);
-    disable_scheduler_entry(GPS);
+    // disable_scheduler_entry(GPS); // MZ GPS data is always enabled for beacon use
     disable_scheduler_entry(FLIGHT_MODE);
     disable_scheduler_entry(PASSTHROUGH);
     disable_scheduler_entry(STATUS_TEXT);
