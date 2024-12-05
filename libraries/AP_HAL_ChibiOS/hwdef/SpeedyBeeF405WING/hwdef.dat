@@ -176,11 +176,11 @@ undef HAL_MOUNT_ENABLED
 undef HAL_MOUNT_SERVO_ENABLED
 undef QAUTOTUNE_ENABLED
 
-define AP_CAMERA_MOUNT_ENABLED 1
+define AP_CAMERA_MOUNT_ENABLED 0
 
-define HAL_MOUNT_ENABLED 1
+define HAL_MOUNT_ENABLED 0
 define AP_MOUNT_BACKEND_DEFAULT_ENABLED 0
-define HAL_MOUNT_SERVO_ENABLED 1
+define HAL_MOUNT_SERVO_ENABLED 0
 define QAUTOTUNE_ENABLED 0
 
 define DEFAULT_NTF_LED_TYPES 257
@@ -212,3 +212,6 @@ define HAL_SPEKTRUM_TELEM_ENABLED 0
 
 # enable PID filters
 define AP_FILTER_ENABLED 1
+
+# bin/arduplane    954839      2624   128536                957463           25568  Not Applicable 
+# bin/arduplane    943699      2448   128716                946147           36880  Not Applicable

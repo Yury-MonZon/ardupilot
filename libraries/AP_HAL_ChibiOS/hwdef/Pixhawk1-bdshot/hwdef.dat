@@ -40,3 +40,49 @@ define BOARD_CHECK_F427_USE_1M "ERROR: 1M flash use Pixhawk1-1M"
 # enable support for dshot on iomcu
 ROMFS io_firmware_dshot.bin Tools/IO_Firmware/iofirmware_dshot_lowpolh.bin
 define HAL_WITH_IO_MCU_DSHOT 1
+
+# MZ mods:
+define HAL_NAVEKF2_AVAILABLE 0
+define HAL_NAVEKF3_AVAILABLE 1
+define EK3_FEATURE_DRAG_FUSION 1
+define OSD_ENABLED 1
+define HAL_OSD_TYPE_DEFAULT 5
+# Crossfire telemetry must be explicitly enabled on minimized boards:
+define HAL_CRSF_TELEM_ENABLED 1
+define HAL_CRSF_TELEM_TEXT_SELECTION_ENABLED OSD_ENABLED && OSD_PARAM_ENABLED && HAL_CRSF_TELEM_ENABLED
+define AP_OSD_LINK_STATS_EXTENSIONS_ENABLED 1
+
+# define AP_PLANE_BLACKBOX_LOGGING 1 - DO NOT ENABLE - WILL NOT ARM
+undef HAL_BARO_WIND_COMP_ENABLED
+define HAL_BARO_WIND_COMP_ENABLED 1
+
+# Crossfire telemetry must be explicitly enabled on minimized boards:
+define HAL_CRSF_TELEM_ENABLED 1
+define HAL_CRSF_TELEM_TEXT_SELECTION_ENABLED OSD_ENABLED && OSD_PARAM_ENABLED && HAL_CRSF_TELEM_ENABLED
+ 
+# Soaring is off by default on of smaller boards.
+define HAL_SOARING_ENABLED 1
+ 
+# RunCam control isn't available on smaller boards
+define HAL_RUNCAM_ENABLED 0
+
+# minimized boards don't get configuration via SmartAudio by default:
+define AP_SMARTAUDIO_ENABLED 0
+ 
+# no Spektrum telemetry:
+define HAL_SPEKTRUM_TELEM_ENABLED 0
+
+undef AP_CAMERA_MOUNT_ENABLED
+undef HAL_MOUNT_ENABLED
+undef HAL_MOUNT_SERVO_ENABLED
+undef QAUTOTUNE_ENABLED
+
+define AP_CAMERA_MOUNT_ENABLED 0
+
+define HAL_MOUNT_ENABLED 0
+define AP_MOUNT_BACKEND_DEFAULT_ENABLED 0
+define HAL_MOUNT_SERVO_ENABLED 0
+define QAUTOTUNE_ENABLED 0
+
+# bin/arduplane   1585139      4060   192684               1589199          491540  Not Applicable 
+# bin/arduplane   1517907      3696   193044               1521603          559132  Not Applicable
