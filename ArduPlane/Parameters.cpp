@@ -44,6 +44,7 @@ const AP_Param::Info Plane::var_info[] = {
     // @Description: Fixed Wing Autotune specific options. Useful on QuadPlanes with higher INS_GYRO_FILTER settings to prevent these filter values from being set too agressively during Fixed Wing Autotune.
     // @Bitmask: 0: Disable FLTD update by Autotune
     // @Bitmask: 1: Disable FLTT update by Autotune
+    // @Bitmask: 2: Double tau for pitch
     // @User: Advanced
     ASCALAR(autotune_options, "AUTOTUNE_OPTIONS",  0),
 

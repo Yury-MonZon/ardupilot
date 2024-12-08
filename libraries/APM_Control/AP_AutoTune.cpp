@@ -566,7 +566,12 @@ void AP_AutoTune::update_rmax(void)
         target_tau = tuning_table[level-1].tau;
         if (type == AUTOTUNE_PITCH) {
             // 50% longer time constant on pitch
-            target_tau *= 1.5;
+            if (has_option(DOUBLE_PITCH_TAU)) { 
+                target_tau *= 2.0; 
+                gcs().send_text(MAV_SEVERITY_INFO, "Double Pitch Tau enabled");
+            } else { 
+                target_tau *= 1.5; 
+            }
         }
     }
 

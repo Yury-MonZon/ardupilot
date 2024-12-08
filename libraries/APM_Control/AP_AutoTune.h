@@ -26,7 +26,8 @@ public:
 
     enum Options {
         DISABLE_FLTD_UPDATE = 0,
-        DISABLE_FLTT_UPDATE = 1
+        DISABLE_FLTT_UPDATE = 1,
+        DOUBLE_PITCH_TAU = 2,
     };
 
     struct PACKED log_ATRP {
