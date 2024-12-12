@@ -289,7 +289,7 @@ void AP_AutoTune::update(AP_PIDInfo &pinfo, float scaler, float angle_err_deg)
             rpid.kP().set(current.P);
             rpid.kD().set(current.D);
             action = Action::IDLE_LOWER_PD;
-            GCS_SEND_TEXT(MAV_SEVERITY_INFO, "ATUN: %s Action: Idle lower P: %f D: %f", axis_string(), current.P, current.D);
+            // GCS_SEND_TEXT(MAV_SEVERITY_INFO, "ATUN: %s Action: Idle lower P: %f D: %f", axis_string(), current.P, current.D);
             P_limit = MIN(P_limit, current.P);
             D_limit = MIN(D_limit, current.D);
             state_change(state);
@@ -309,7 +309,7 @@ void AP_AutoTune::update(AP_PIDInfo &pinfo, float scaler, float angle_err_deg)
         (state == ATState::DEMAND_NEG && min_rate > -0.01 * current.rmax_neg)) {
         // we didn't get enough rate
         action = Action::LOW_RATE;
-        GCS_SEND_TEXT(MAV_SEVERITY_INFO, "ATUN: %s Action: Low rate", axis_string());
+        // GCS_SEND_TEXT(MAV_SEVERITY_INFO, "ATUN: %s Action: Low rate", axis_string());
         state_change(ATState::IDLE);
         return;
     }
@@ -317,7 +317,7 @@ void AP_AutoTune::update(AP_PIDInfo &pinfo, float scaler, float angle_err_deg)
     if (now - state_enter_ms < 100) {
         // not long enough sample
         action = Action::SHORT;
-        GCS_SEND_TEXT(MAV_SEVERITY_INFO, "ATUN: %s Action: Short", axis_string());
+        // GCS_SEND_TEXT(MAV_SEVERITY_INFO, "ATUN: %s Action: Short", axis_string());
         state_change(ATState::IDLE);
         return;
     }
@@ -325,8 +325,16 @@ void AP_AutoTune::update(AP_PIDInfo &pinfo, float scaler, float angle_err_deg)
     // we've finished an event. calculate the single-event FF value
     if (state == ATState::DEMAND_POS) {
         FF_single = max_actuator / (max_rate * scaler);
+        int got_rate = (int)(max_rate / max_target * 100.0);
+        GCS_SEND_TEXT(MAV_SEVERITY_ERROR, "ATUN: %s %d%%", axis_string(), got_rate);
+        // if ( (is_positive(P_limit)) && (got_rate < 95)) {rpid.kP().set(rpid.kP().get()*1.1);} 
+        // GCS_SEND_TEXT(MAV_SEVERITY_ERROR, "ATUN: %s Act: %d Des: %d", axis_string(), (int)actual_rate, (int)desired_rate);
     } else {
         FF_single = min_actuator / (min_rate * scaler);
+        int got_rate = (int)(max_rate / max_target * 100.0);
+        GCS_SEND_TEXT(MAV_SEVERITY_ERROR, "ATUN: %s %d%% ", axis_string(), got_rate);
+        // if ( (is_positive(P_limit)) && (got_rate < 95)) {rpid.kP().set(rpid.kP().get()*1.1);} 
+        // GCS_SEND_TEXT(MAV_SEVERITY_ERROR, "ATUN: %s Act: %d Des: %d", axis_string(), (int)actual_rate, (int)desired_rate);
     }
 
     // apply median filter
@@ -351,7 +359,7 @@ void AP_AutoTune::update(AP_PIDInfo &pinfo, float scaler, float angle_err_deg)
     } else if (ff_count == 4) {
         // we got a good ff estimate, halve P ready to start raising D
         P *= 0.5;
-        GCS_SEND_TEXT(MAV_SEVERITY_INFO, "ATUN: %s Got FF. Dropping P: %f D: %f", axis_string(), P, D);
+        // GCS_SEND_TEXT(MAV_SEVERITY_INFO, "ATUN: %s Got FF. Dropping P: %f D: %f", axis_string(), P, D);
     }
 
     // see if the slew limiter kicked in
@@ -362,14 +370,16 @@ void AP_AutoTune::update(AP_PIDInfo &pinfo, float scaler, float angle_err_deg)
             P *= 0.50;
             D *= 0.90;
             action = Action::LOWER_PD;
-            GCS_SEND_TEXT(MAV_SEVERITY_INFO, "ATUN: %s Slew limit! Action: Lower P: %f D: %f", axis_string(), P, D);
+            done_count = 0;
+            // GCS_SEND_TEXT(MAV_SEVERITY_INFO, "ATUN: %s Slew limit! Action: Lower P: %f D: %f", axis_string(), P, D);
         } else {
             // set D limit to 30% of current D, remember D limit and start to work on P
             D *= 0.5;
             D_limit = D;
             D_set_ms = now;
             action = Action::LOWER_D;
-            GCS_SEND_TEXT(MAV_SEVERITY_INFO, "ATUN: %s Oscillation! Action: Lower D: %f", axis_string(), D);
+            done_count = 0;
+            // GCS_SEND_TEXT(MAV_SEVERITY_INFO, "ATUN: %s Oscillation! Action: Lower D: %f", axis_string(), D);
             GCS_SEND_TEXT(MAV_SEVERITY_ERROR, "%sD: %.4f", axis_string(), D_limit);
         }
     } else if (min_Dmod < 1.0) {
@@ -382,7 +392,7 @@ void AP_AutoTune::update(AP_PIDInfo &pinfo, float scaler, float angle_err_deg)
                 D_limit = D;
                 D_set_ms = now;
                 action = Action::LOWER_D;
-                GCS_SEND_TEXT(MAV_SEVERITY_INFO, "ATUN: %s Action: Lower D: %f some more", axis_string(), D);
+                // GCS_SEND_TEXT(MAV_SEVERITY_INFO, "ATUN: %s Action: Lower D: %f some more", axis_string(), D);
                 GCS_SEND_TEXT(MAV_SEVERITY_ERROR, "%sD: %.4f", axis_string(), D_limit);
                 done_count = 0;
             } else if (now - P_set_ms > 2500) {
@@ -392,13 +402,14 @@ void AP_AutoTune::update(AP_PIDInfo &pinfo, float scaler, float angle_err_deg)
                     // later part of the tune from giving us a very
                     // low P gain
                     P *= 0.90;
+                    // D *= 1.10;
                 } else {
                     P *= 0.50;
                 }
                 P_limit = P;
                 P_set_ms = now;
                 action = Action::LOWER_P;
-                GCS_SEND_TEXT(MAV_SEVERITY_INFO, "ATUN: %s Action: Lower P: %f", axis_string(), P);
+                // GCS_SEND_TEXT(MAV_SEVERITY_INFO, "ATUN: %s Action: Lower P: %f", axis_string(), P);
                 done_count = 0;
                 GCS_SEND_TEXT(MAV_SEVERITY_ERROR, "%sP: %.4f", axis_string(), P_limit);
             }
@@ -410,12 +421,14 @@ void AP_AutoTune::update(AP_PIDInfo &pinfo, float scaler, float angle_err_deg)
         /* we haven't detected D oscillation yet, keep raising D */
         D *= 1.1;
         action = Action::RAISE_D;
-        GCS_SEND_TEXT(MAV_SEVERITY_INFO, "ATUN: %s Action: Raise D: %f", axis_string(), D);
+        done_count = 0;
+        // GCS_SEND_TEXT(MAV_SEVERITY_INFO, "ATUN: %s Action: Raise D: %f", axis_string(), D);
     } else if (!is_positive(P_limit)) {
         /* not oscillating, increase P gain */
         P *= 1.2;
         action = Action::RAISE_PD;
-        GCS_SEND_TEXT(MAV_SEVERITY_INFO, "ATUN: %s Action: Raise P: %f", axis_string(), P);
+        done_count = 0;
+        // GCS_SEND_TEXT(MAV_SEVERITY_INFO, "ATUN: %s Action: Raise P: %f", axis_string(), P);
     } else {
         // after getting P_limit we consider the tune done when we
         // have done 3 cycles without reducing P
@@ -578,7 +591,8 @@ void AP_AutoTune::update_rmax(void)
             // 50% longer time constant on pitch
             if (has_option(DOUBLE_PITCH_TAU)) { 
                 target_tau *= 2.0; 
-                GCS_SEND_TEXT(MAV_SEVERITY_INFO, "Double Pitch Tau enabled");
+                static bool run_once = true;
+                if (run_once) { GCS_SEND_TEXT(MAV_SEVERITY_INFO, "Double Pitch Tau enabled"); run_once = false; }
             } else { 
                 target_tau *= 1.5; 
             }
@@ -605,11 +619,11 @@ void AP_AutoTune::update_rmax(void)
         current.rmax_neg.set(current.rmax_pos.get());
     }
 
-    GCS_SEND_TEXT(MAV_SEVERITY_INFO, "ATUN: %s RMAX_pos: %d RMAX_neg: %d", axis_string(), current.rmax_pos.get(), current.rmax_neg.get());
+    // GCS_SEND_TEXT(MAV_SEVERITY_INFO, "ATUN: %s RMAX_pos: %d RMAX_neg: %d", axis_string(), current.rmax_pos.get(), current.rmax_neg.get());
 
     // move tau by max 15% per loop
     current.tau.set(constrain_float(target_tau,
                                     current.tau*0.85,
                                     current.tau*1.15));
-    GCS_SEND_TEXT(MAV_SEVERITY_INFO, "ATUN: %s Tau: %f", axis_string(), current.tau.get());
+    // GCS_SEND_TEXT(MAV_SEVERITY_INFO, "ATUN: %s Tau: %f", axis_string(), current.tau.get());
 }
