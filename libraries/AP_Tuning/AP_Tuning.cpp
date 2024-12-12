@@ -230,7 +230,7 @@ void AP_Tuning::check_input(uint8_t flightmode)
     GCS_SEND_TEXT(MAV_SEVERITY_INFO, 
         "Tuning %s%s%0.5f", 
         get_tuning_name(current_parm), 
-        ((chan_value < dead_zone) && (chan_value > -dead_zone)) ? ">" : ":", 
+        ((chan_value < dead_zone) && (chan_value > -dead_zone)) ? "> " : ": ", 
         (double)(new_value));
 
 #if HAL_LOGGING_ENABLED
