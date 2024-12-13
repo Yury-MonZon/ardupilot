@@ -54,7 +54,7 @@ AP_AutoTune::AP_AutoTune(ATGains &_gains, ATType _type,
     rpid(_rpid),
     type(_type),
     aparm(parms),
-    ff_filter(2)
+    ff_filter(3)
 {}
 
 #if CONFIG_HAL_BOARD == HAL_BOARD_SITL
@@ -356,7 +356,7 @@ void AP_AutoTune::update(AP_PIDInfo &pinfo, float scaler, float angle_err_deg)
         // apply minimum D and P values
         D = MAX(D, 0.0005);
         P = MAX(P, 0.01);
-    } else if (ff_count == 4) {
+    } else if (ff_count == 6) {
         // we got a good ff estimate, halve P ready to start raising D
         P *= 0.5;
         // GCS_SEND_TEXT(MAV_SEVERITY_INFO, "ATUN: %s Got FF. Dropping P: %f D: %f", axis_string(), P, D);
@@ -414,7 +414,7 @@ void AP_AutoTune::update(AP_PIDInfo &pinfo, float scaler, float angle_err_deg)
                 GCS_SEND_TEXT(MAV_SEVERITY_ERROR, "%sP: %.4f", axis_string(), P_limit);
             }
         }
-    } else if (ff_count < 4) {
+    } else if (ff_count < 6) {
         // we don't have a good FF estimate yet, keep going
 
     } else if (!is_positive(D_limit)) {

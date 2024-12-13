@@ -125,8 +125,8 @@ private:
         return (aparm.autotune_options.get() & uint32_t(1<<uint32_t(option))) != 0;
     }
 
-    // 5 point mode filter for FF estimate
-    ModeFilterFloat_Size5 ff_filter;
+    // 7 point mode filter for FF estimate
+    ModeFilterFloat_Size7 ff_filter;
 
     LowPassFilterConstDtFloat actuator_filter;
     LowPassFilterConstDtFloat rate_filter;
