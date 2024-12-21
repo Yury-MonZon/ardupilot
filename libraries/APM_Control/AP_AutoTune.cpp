@@ -326,30 +326,30 @@ void AP_AutoTune::update(AP_PIDInfo &pinfo, float scaler, float angle_err_deg)
     float D = rpid.kD();
     float P = rpid.kP();
 
-    static int fine_tune = 0;
+    // static int fine_tune = 0;
     // we've finished an event. calculate the single-event FF value
     if (state == ATState::DEMAND_POS) {
         FF_single = max_actuator / (max_rate * scaler);
-        int got_rate = (int)(max_rate / max_target * 100.0);
-        if ( (got_rate < 90) && (fine_tune == 1) ){
-            P = P * 1.05;
-            GCS_SEND_TEXT(MAV_SEVERITY_ERROR, "ATUN: %s %d%% P:%0.4f", axis_string(), got_rate, P);
-        }
-        else {
-            GCS_SEND_TEXT(MAV_SEVERITY_ERROR, "ATUN: %s %d%%", axis_string(), got_rate);
-        }
+        // int got_rate = (int)(max_rate / max_target * 100.0);
+        // if ( (got_rate < 90) && (fine_tune == 1) ){
+        //     P = P * 1.05;
+        //     GCS_SEND_TEXT(MAV_SEVERITY_ERROR, "ATUN: %s %d%% P:%0.4f", axis_string(), got_rate, P);
+        // }
+        // else {
+        //     GCS_SEND_TEXT(MAV_SEVERITY_ERROR, "ATUN: %s %d%%", axis_string(), got_rate);
+        // }
         // if ( (is_positive(P_limit)) && (got_rate < 95)) {rpid.kP().set(rpid.kP().get()*1.1);} 
         // GCS_SEND_TEXT(MAV_SEVERITY_ERROR, "ATUN: %s Act: %d Des: %d", axis_string(), (int)actual_rate, (int)desired_rate);
     } else {
         FF_single = min_actuator / (min_rate * scaler);
-        int got_rate = (int)(min_rate / min_target * 100.0);
-        if ( (got_rate < 90) && (fine_tune == 1) ){
-            P = P * 1.05;
-            GCS_SEND_TEXT(MAV_SEVERITY_ERROR, "ATUN: %s %d%% P:%0.4f", axis_string(), got_rate, P);
-        }
-        else {
-            GCS_SEND_TEXT(MAV_SEVERITY_ERROR, "ATUN: %s %d%%", axis_string(), got_rate);
-        }
+        // int got_rate = (int)(min_rate / min_target * 100.0);
+        // if ( (got_rate < 90) && (fine_tune == 1) ){
+        //     P = P * 1.05;
+        //     GCS_SEND_TEXT(MAV_SEVERITY_ERROR, "ATUN: %s %d%% P:%0.4f", axis_string(), got_rate, P);
+        // }
+        // else {
+        //     GCS_SEND_TEXT(MAV_SEVERITY_ERROR, "ATUN: %s %d%%", axis_string(), got_rate);
+        // }
         // if ( (is_positive(P_limit)) && (got_rate < 95)) {rpid.kP().set(rpid.kP().get()*1.1);} 
         // GCS_SEND_TEXT(MAV_SEVERITY_ERROR, "ATUN: %s Act: %d Des: %d", axis_string(), (int)actual_rate, (int)desired_rate);
     }
@@ -447,9 +447,10 @@ void AP_AutoTune::update(AP_PIDInfo &pinfo, float scaler, float angle_err_deg)
         // have done 3 cycles without reducing P
         if (done_count < 3) {
             if (++done_count == 3) {
-                GCS_SEND_TEXT(MAV_SEVERITY_ERROR, "ATUN: %s: Finished P: %f D: %f FF: %f", axis_string(),P, D, FF);
+                // GCS_SEND_TEXT(MAV_SEVERITY_ERROR, "ATUN: %s: Finished P: %f D: %f FF: %f", axis_string(),P, D, FF);
+                GCS_SEND_TEXT(MAV_SEVERITY_ERROR, "%s: Finished", axis_string());
                 save_gains();
-                fine_tune++; // enable fine tuning
+                // fine_tune++; // enable fine tuning
             }
         }
     }
