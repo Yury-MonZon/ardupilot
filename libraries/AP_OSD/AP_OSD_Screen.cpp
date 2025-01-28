@@ -2308,14 +2308,24 @@ void AP_OSD_Screen::draw_xtrack_error(uint8_t x, uint8_t y)
 void AP_OSD_Screen::draw_stat(uint8_t x, uint8_t y)
 {
     backend->write(x+2, y, false, "%c%c%c", 0x4d,0x41,0x58);
-    backend->write(x, y+1, false, "%c",SYMBOL(SYM_GSPD));
-    backend->write(x+1, y+1, false, "%4d%c", (int)u_scale(SPEED, osd->_stats.max_speed_mps), u_icon(SPEED));
-    backend->write(x, y+2, false, "%5.1f%c", (double)osd->_stats.max_current_a, SYMBOL(SYM_AMP));
-    backend->write(x, y+3, false, "%5d%c", (int)u_scale(ALTITUDE, osd->_stats.max_alt_m), u_icon(ALTITUDE));
-    backend->write(x, y+4, false, "%c", SYMBOL(SYM_HOME));
-    draw_distance(x+1, y+4, osd->_stats.max_dist_m);
-    backend->write(x, y+5, false, "%c", SYMBOL(SYM_DIST));
-    draw_distance(x+1, y+5, osd->_stats.last_distance_m);
+
+    backend->write(x, y+1, false, "%c",SYMBOL(SYM_ASPD));
+    backend->write(x+1, y+1, false, "%4d%c", (int)u_scale(SPEED, osd->_stats.max_airspeed_mps), u_icon(SPEED));
+
+    backend->write(x, y+2, false, "%c",SYMBOL(SYM_GSPD));
+    backend->write(x+1, y+2, false, "%4d%c", (int)u_scale(SPEED, osd->_stats.max_speed_mps), u_icon(SPEED));
+
+    backend->write(x, y+3, false, "%5.1f%c", (double)osd->_stats.max_current_a, SYMBOL(SYM_AMP));
+
+    backend->write(x, y+4, false, "%5.1f%c", (double)osd->_stats.avg_current_a, SYMBOL(SYM_AMP));
+
+    backend->write(x, y+5, false, "%5d%c", (int)u_scale(ALTITUDE, osd->_stats.max_alt_m), u_icon(ALTITUDE));
+
+    backend->write(x, y+6, false, "%c", SYMBOL(SYM_HOME));
+    draw_distance(x+1, y+6, osd->_stats.max_dist_m);
+    
+    backend->write(x, y+7, false, "%c", SYMBOL(SYM_DIST));
+    draw_distance(x+1, y+7, osd->_stats.last_distance_m);
 }
 
 void AP_OSD_Screen::draw_dist(uint8_t x, uint8_t y)
