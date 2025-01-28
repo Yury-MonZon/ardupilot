@@ -179,3 +179,31 @@ define HAL_COMPASS_AUTO_ROT_DEFAULT 2
 define HAL_DEFAULT_INS_FAST_SAMPLE 3
 # Motor order implies Betaflight/X for standard ESCs
 define HAL_FRAME_TYPE_DEFAULT 12
+
+# MZ mods:
+define HAL_NAVEKF2_AVAILABLE 0
+define HAL_NAVEKF3_AVAILABLE 1
+define EK3_FEATURE_DRAG_FUSION 1
+# define AP_PLANE_BLACKBOX_LOGGING 1 - DO NOT ENABLE - WILL NOT ARM
+undef HAL_BARO_WIND_COMP_ENABLED
+define HAL_BARO_WIND_COMP_ENABLED 1
+
+# Crossfire telemetry must be explicitly enabled on minimized boards:
+define HAL_CRSF_TELEM_ENABLED 1
+define HAL_CRSF_TELEM_TEXT_SELECTION_ENABLED OSD_ENABLED && OSD_PARAM_ENABLED && HAL_CRSF_TELEM_ENABLED
+define AP_OSD_LINK_STATS_EXTENSIONS_ENABLED 1
+ 
+ # Soaring is off by default on of smaller boards.
+define HAL_SOARING_ENABLED 1
+ 
+# RunCam control isn't available on smaller boards
+define HAL_RUNCAM_ENABLED 0
+
+# minimized boards don't get configuration via SmartAudio by default:
+define AP_SMARTAUDIO_ENABLED 0
+ 
+# no Spektrum telemetry:
+define HAL_SPEKTRUM_TELEM_ENABLED 0
+
+# enable PID filters
+define AP_FILTER_ENABLED 1
