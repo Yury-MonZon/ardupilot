@@ -162,7 +162,7 @@ define HAL_OS_FATFS_IO 1
 
 # setup for OSD
 define OSD_ENABLED 1
-define HAL_OSD_TYPE_DEFAULT 1
+define HAL_OSD_TYPE_DEFAULT 5
 ROMFS_WILDCARD libraries/AP_OSD/fonts/font0.bin
 
 #VTX power control
@@ -175,9 +175,42 @@ undef AP_CAMERA_MOUNT_ENABLED
 undef HAL_MOUNT_ENABLED
 undef HAL_MOUNT_SERVO_ENABLED
 
-define AP_CAMERA_MOUNT_ENABLED 1
-define HAL_MOUNT_ENABLED 1
+define AP_CAMERA_MOUNT_ENABLED 0
+
+define HAL_MOUNT_ENABLED 0
 define AP_MOUNT_BACKEND_DEFAULT_ENABLED 0
-define HAL_MOUNT_SERVO_ENABLED 1
+define HAL_MOUNT_SERVO_ENABLED 0
+define QAUTOTUNE_ENABLED 0
 
 define DEFAULT_NTF_LED_TYPES 257
+
+# MZ mods:
+define HAL_NAVEKF2_AVAILABLE 0
+define HAL_NAVEKF3_AVAILABLE 1
+define EK3_FEATURE_DRAG_FUSION 1
+# define AP_PLANE_BLACKBOX_LOGGING 1 - DO NOT ENABLE - WILL NOT ARM
+undef HAL_BARO_WIND_COMP_ENABLED
+define HAL_BARO_WIND_COMP_ENABLED 1
+
+# Crossfire telemetry must be explicitly enabled on minimized boards:
+define HAL_CRSF_TELEM_ENABLED 1
+define HAL_CRSF_TELEM_TEXT_SELECTION_ENABLED OSD_ENABLED && OSD_PARAM_ENABLED && HAL_CRSF_TELEM_ENABLED
+define AP_OSD_LINK_STATS_EXTENSIONS_ENABLED 1
+ 
+ # Soaring is off by default on of smaller boards.
+define HAL_SOARING_ENABLED 1
+ 
+# RunCam control isn't available on smaller boards
+define HAL_RUNCAM_ENABLED 0
+
+# minimized boards don't get configuration via SmartAudio by default:
+define AP_SMARTAUDIO_ENABLED 0
+ 
+# no Spektrum telemetry:
+define HAL_SPEKTRUM_TELEM_ENABLED 0
+
+# enable PID filters
+define AP_FILTER_ENABLED 1
+
+# bin/arduplane    954839      2624   128536                957463           25568  Not Applicable 
+# bin/arduplane    943699      2448   128716                946147           36880  Not Applicable
