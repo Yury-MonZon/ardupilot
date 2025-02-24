@@ -449,6 +449,44 @@ void Plane::stabilize()
             steerController.reset_I();            
         }
     }
+
+    // show Dmod if it is actively suppressing PIDs
+    static uint32_t last_dmod_msg_ms;
+    if (now - last_dmod_msg_ms > 100) {  // Rate limit to 10Hz
+        const int8_t roll_dmod = rollController.get_pid_info().Dmod*10.0f;
+        const int8_t pitch_dmod = pitchController.get_pid_info().Dmod*10.0f;
+        const int8_t yaw_dmod = yawController.get_pid_info().Dmod*10.0f;
+        
+        if (((roll_dmod!=0) && (roll_dmod < 10)) || 
+            ((pitch_dmod!=0) && (pitch_dmod < 10)) || 
+            ((yaw_dmod!=0) && (yaw_dmod < 10))) {
+            char msg[32];
+            char *p = msg;
+            p += snprintf(p, sizeof(msg), "Dmod");
+            
+            if ((roll_dmod!=0) && (roll_dmod < 10)) {
+                p += snprintf(p, sizeof(msg)-(p-msg), " R:%d", 10-roll_dmod);
+            } else {
+                p += snprintf(p, sizeof(msg)-(p-msg), "      ");
+            }
+
+            if ((pitch_dmod!=0) && (pitch_dmod < 10)) {
+                p += snprintf(p, sizeof(msg)-(p-msg), " P:%d", 10-pitch_dmod);
+            } else {
+                p += snprintf(p, sizeof(msg)-(p-msg), "      ");
+            }
+
+            if ((yaw_dmod!=0) && (yaw_dmod < 10)) {
+                p += snprintf(p, sizeof(msg)-(p-msg), " Y:%d", 10-yaw_dmod);
+            } else {
+                p += snprintf(p, sizeof(msg)-(p-msg), "      ");
+            }
+
+            GCS_SEND_TEXT(MAV_SEVERITY_INFO, "%s", msg);
+            // GCS_SEND_TEXT(MAV_SEVERITY_INFO, "%d %d %d", roll_dmod, pitch_dmod, yaw_dmod);
+            last_dmod_msg_ms = now;
+        }
+    }
 }
 
 
