@@ -40,6 +40,9 @@ const uint8_t AP_Tuning_Plane::tuning_set_rate_yawDP[]=        { TUNING_RATE_YAW
 const uint8_t AP_Tuning_Plane::tuning_set_dp_roll_pitch[] =    { TUNING_RLL_D, TUNING_RLL_P, TUNING_PIT_D, TUNING_PIT_P };
 const uint8_t AP_Tuning_Plane::tuning_set_pidff_roll[] =       { TUNING_RLL_P, TUNING_RLL_I, TUNING_RLL_D, TUNING_RLL_FF };
 const uint8_t AP_Tuning_Plane::tuning_set_pidff_pitch[] =      { TUNING_PIT_P, TUNING_PIT_I, TUNING_PIT_D, TUNING_PIT_FF };
+// const uint8_t AP_Tuning_Plane::tuning_set_pidff_yaw[] =        { TUNING_YAW_P, TUNING_YAW_I, TUNING_YAW_D, TUNING_YAW_FF };
+// const uint8_t AP_Tuning_Plane::tuning_set_pidff_rpy[] =        { TUNING_RLL_P, TUNING_RLL_I, TUNING_RLL_D, TUNING_RLL_FF, TUNING_PIT_P, TUNING_PIT_I, TUNING_PIT_D, TUNING_PIT_FF, TUNING_YAW_P, TUNING_YAW_I, TUNING_YAW_D, TUNING_YAW_FF };
+const uint8_t AP_Tuning_Plane::tuning_set_pid_rp[] =          { TUNING_RLL_P, TUNING_RLL_I, TUNING_RLL_D, TUNING_PIT_P, TUNING_PIT_I, TUNING_PIT_D };
 
 // macro to prevent getting the array length wrong
 #define TUNING_ARRAY(v) ARRAY_SIZE(v), v
@@ -59,6 +62,9 @@ const AP_Tuning_Plane::tuning_set AP_Tuning_Plane::tuning_sets[] = {
     { TUNING_SET_DP_ROLL_PITCH,         TUNING_ARRAY(tuning_set_dp_roll_pitch) },
     { TUNING_SET_PIDFF_ROLL,            TUNING_ARRAY(tuning_set_pidff_roll) },
     { TUNING_SET_PIDFF_PITCH,           TUNING_ARRAY(tuning_set_pidff_pitch) },
+    // { TUNING_SET_PIDFF_YAW,             TUNING_ARRAY(tuning_set_pidff_yaw) },
+    // { TUNING_SET_PIDFF_RPY,             TUNING_ARRAY(tuning_set_pidff_rpy) },
+    { TUNING_SET_PID_RP,                TUNING_ARRAY(tuning_set_pid_rp) },
     { 0, 0, nullptr }
 };
 
@@ -101,6 +107,10 @@ const AP_Tuning_Plane::tuning_name AP_Tuning_Plane::tuning_names[] = {
     { TUNING_PIT_D,        "PitchD" },
     { TUNING_PIT_FF,       "PitchFF" },
     { TUNING_Q_FWD_THR,    "QModeFwdThr" },
+    // { TUNING_YAW_P,        "YawP" },
+    // { TUNING_YAW_I,        "YawI" },
+    // { TUNING_YAW_D,        "YawD" },
+    // { TUNING_YAW_FF,       "YawFF" },
     { TUNING_NONE, nullptr }
 };
 
@@ -226,6 +236,18 @@ AP_Float *AP_Tuning_Plane::get_param_pointer(uint8_t parm)
 
     case TUNING_PIT_FF:
         return &plane.pitchController.kFF();
+    
+    // case TUNING_YAW_P:
+    //     return &plane.yawController.kP();
+
+    // case TUNING_YAW_I:
+    //     return &plane.yawController.kI();
+
+    // case TUNING_YAW_D:
+    //     return &plane.yawController.kD();
+
+    // case TUNING_YAW_FF:
+    //     return &plane.yawController.kFF();
     }
     return nullptr;
 }
