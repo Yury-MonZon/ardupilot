@@ -78,6 +78,11 @@ private:
         TUNING_PIT_FF =                       57,
 
         TUNING_Q_FWD_THR =                    58,
+
+        // TUNING_YAW_P =                        59,
+        // TUNING_YAW_I =                        60,
+        // TUNING_YAW_D =                        61,
+        // TUNING_YAW_FF =                       62,
     };
 
     /*
@@ -94,6 +99,13 @@ private:
         TUNING_SET_RATE_PITCHDP =            8,
         TUNING_SET_RATE_ROLLDP =             9,
         TUNING_SET_RATE_YAWDP =             10,
+        TUNING_SET_DP_ROLL_PITCH =          11,
+        TUNING_SET_PIDFF_ROLL =             12,
+        TUNING_SET_PIDFF_PITCH =            13,
+        // TUNING_SET_PIDFF_YAW =              14,
+        // TUNING_SET_PIDFF_RPY =              15,
+        TUNING_SET_PID_RP =                 14,
+        
     };
 
     AP_Float *get_param_pointer(uint8_t parm) override;
@@ -112,6 +124,12 @@ private:
     static const uint8_t tuning_set_rate_pitchDP[];
     static const uint8_t tuning_set_rate_rollDP[];
     static const uint8_t tuning_set_rate_yawDP[];
+    static const uint8_t tuning_set_dp_roll_pitch[];
+    static const uint8_t tuning_set_pidff_roll[];
+    static const uint8_t tuning_set_pidff_pitch[];
+    // static const uint8_t tuning_set_pidff_yaw[];
+    // static const uint8_t tuning_set_pidff_rpy[];
+    static const uint8_t tuning_set_pid_rp[];
 
     // mask of what params have been set
     uint64_t have_set;
