@@ -6,7 +6,7 @@
 #if BOARD_FLASH_SIZE > 1024
 #define AP_FILTER_NUM_FILTERS 8
 #else
-#define AP_FILTER_NUM_FILTERS 0
+#define AP_FILTER_NUM_FILTERS 4
 #endif
 #endif
 
