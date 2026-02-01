@@ -356,6 +356,18 @@ void Plane::one_second_loop()
     AP_Notify::flags.pre_arm_gps_check = true;
     AP_Notify::flags.armed = arming.is_armed() || arming.arming_required() == AP_Arming::Required::NO;
 
+    // Check if EKF reports vibration affecting flight
+    if (AP_Notify::flags.flying && ahrs.is_vibration_affected()) {
+        static uint32_t last_vibe_warn_ms = 0;
+        uint32_t now_ms = AP_HAL::millis();
+        
+        // Only warn every 30 seconds to avoid spam
+        if (now_ms - last_vibe_warn_ms > 30000) {
+            GCS_SEND_TEXT(MAV_SEVERITY_WARNING, "Vibration High!");
+            last_vibe_warn_ms = now_ms;
+        }
+    }
+
 #if AP_TERRAIN_AVAILABLE && HAL_LOGGING_ENABLED
     if (should_log(MASK_LOG_GPS)) {
         terrain.log_terrain_data();
