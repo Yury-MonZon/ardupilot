@@ -2355,10 +2355,13 @@ void AP_OSD_Screen::draw_eff(uint8_t x, uint8_t y)
     }
     float speed = u_scale(SPEED,v.length());
     float current_amps;
+    float voltage = battery.voltage(0);
     if ((speed > 2.0) && battery.current_amps(current_amps)) {
-        backend->write(x, y, false, "%c%3d%c", SYMBOL(SYM_EFF),int(1000.0f*current_amps/speed),SYMBOL(SYM_MAH));
+        float watts = current_amps * voltage;
+        float wh_per_km = watts / speed; // W / (km/h) -> Wh/km
+        backend->write(x, y, false, "%c%3.1f%c", SYMBOL(SYM_EFF), (double)wh_per_km, SYMBOL(SYM_WH));
     } else {
-        backend->write(x, y, false, "%c---%c", SYMBOL(SYM_EFF),SYMBOL(SYM_MAH));
+        backend->write(x, y, false, "%c---%c", SYMBOL(SYM_EFF), SYMBOL(SYM_WH));
     }
 }
 #endif  // AP_BATTERY_ENABLED
