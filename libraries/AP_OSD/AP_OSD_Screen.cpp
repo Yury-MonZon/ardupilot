@@ -2055,14 +2055,14 @@ void AP_OSD_Screen::draw_esc_rpm(uint8_t x, uint8_t y)
     uint8_t esc = AP::esc_telem().get_max_rpm_esc();
     if (esc_index > 0) {
         if (!AP::esc_telem().get_rpm(esc_index-1, rpm)) {
+            backend->write(x, y, false, "-----%c", SYMBOL(SYM_RPM));
             return;
         }
     } else if (!AP::esc_telem().get_rpm(esc, rpm)) {
+        backend->write(x, y, false, "-----%c", SYMBOL(SYM_RPM));
         return;
     }
-    float krpm = rpm * 0.001f;
-    const char *format = krpm < 9.995 ? "%.2f%c%c" : (krpm < 99.95 ? "%.1f%c%c" : "%.0f%c%c");
-    backend->write(x, y, false, format, krpm, SYMBOL(SYM_KILO), SYMBOL(SYM_RPM));
+    backend->write(x, y, false, "%5d%c", (int)rpm, SYMBOL(SYM_RPM));
 }
 
 void AP_OSD_Screen::draw_esc_amps(uint8_t x, uint8_t y)
