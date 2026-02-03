@@ -417,6 +417,15 @@ void AP_AutoTune::update(AP_PIDInfo &pinfo, float scaler, float angle_err_deg)
         }
     }
 
+    // Do not update FF if the option is set
+    if (has_option(DISABLE_FF_UPDATE)) {
+        FF = rpid.ff().get(); // Freeze FF at current value - do not tune it
+        if (ff_count < 5) {
+            ff_count = 5; // Skip directly to P/D tuning phase
+            GCS_SEND_TEXT(MAV_SEVERITY_ERROR, "%s: FF Locked: %.4f", axis_string(), FF);
+        }
+    }
+    
     rpid.ff().set(FF);
     rpid.kP().set(P);
     rpid.kD().set(D);
