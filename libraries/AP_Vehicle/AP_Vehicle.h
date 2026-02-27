@@ -292,6 +292,9 @@ public:
     // Returns roll and  pitch for OSD Horizon, Plane overrides to correct for VTOL view and fixed wing PTCH_TRIM_DEG
     virtual void get_osd_roll_pitch_rad(float &roll, float &pitch) const;
 
+    // Returns airspeed minimum for stall warning, returns -1 if not available
+    virtual float get_airspeed_stall() const { return -1; }
+
     /*
      get the target earth-frame angular velocities in rad/s (Z-axis component used by some gimbals)
      */

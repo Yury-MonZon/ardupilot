@@ -53,6 +53,7 @@
 #include <ctype.h>
 #include <GCS_MAVLink/GCS.h>
 #include <AC_Fence/AC_Fence.h>
+   
 
 #if AP_OSD_EXTENDED_LNK_STATS
 // We need to this file to access the CRSF telemetry objects which contains the link stats data
@@ -1983,7 +1984,7 @@ void AP_OSD_Screen::draw_aspeed(uint8_t x, uint8_t y)
         backend->write(x, y, false, "%c%4d%c", SYMBOL(SYM_ASPD), (int)u_scale(SPEED, aspd), u_icon(SPEED));
         if (AP_Notify::flags.flying)
         {
-            if (aspd <= 11) // plane.aparm.airspeed_min 
+            if (aspd <= AP::vehicle()->get_airspeed_stall()) // plane.aparm.airspeed_stall 
             {
                 if (cnt == 0)
                 {
