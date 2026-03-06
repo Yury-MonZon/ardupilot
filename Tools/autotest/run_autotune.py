@@ -1,6 +1,24 @@
 from pymavlink import mavutil
 import time
 
+        # MANUAL        = 0,
+        # CIRCLE        = 1,
+        # STABILIZE     = 2,
+        # TRAINING      = 3,
+        # ACRO          = 4,
+        # FLY_BY_WIRE_A = 5,
+        # FLY_BY_WIRE_B = 6,
+        # CRUISE        = 7,
+        # AUTOTUNE      = 8,
+        # AUTO          = 10,
+        # RTL           = 11,
+        # LOITER        = 12,
+        # TAKEOFF       = 13,
+        # AVOID_ADSB    = 14,
+        # GUIDED        = 15,
+        # INITIALISING  = 16,
+        # THERMAL       = 24,
+
 # Function to simulate RC channel overrides
 def send_rc_override(roll, pitch, yaw):
     master.mav.rc_channels_override_send(
@@ -71,5 +89,4 @@ for a in range(20):
     time.sleep(1)
 
 # Switch back to stabilize mode after tuning
-master.set_mode(7)  # 6 is the code for FBWA, 7 - rtl, 5 - loiter, 8 cruise,
-
+master.set_mode(11) 
