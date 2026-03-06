@@ -27,11 +27,12 @@
 #define DTS6012M_DEVICE_ID          0x03
 #define DTS6012M_DEVICE_TYPE        0x20
 #define DTS6012M_CMD_START_STREAM   0x01
+#define DTS6012M_CMD_SET_FRAME_RATE 0x1A
 #define DTS6012M_HEADER_LEN         7       // header(1) + devid(1) + devtype(1) + cmd(1) + reserved(1) + length(2)
 #define DTS6012M_DATA_LEN           14      // measurement data length
 #define DTS6012M_CRC_LEN            2
 #define DTS6012M_FRAME_LEN          (DTS6012M_HEADER_LEN + DTS6012M_DATA_LEN + DTS6012M_CRC_LEN)  // 23 bytes
-#define DTS6012M_DIST_MAX_MM        20000   // 20m max range
+#define DTS6012M_DIST_MAX_MM        12000   // 12m max range in bright conditions per datasheet
 #define DTS6012M_DIST_INVALID       0xFFFF
 
 // set to 0 to disable CRC verification if the sensor's CRC proves unreliable
@@ -47,6 +48,41 @@ extern const AP_HAL::HAL& hal;
 */
 void AP_RangeFinder_DTS6012M::send_start_command()
 {
+#if 0
+    // Set frame rate to 50 FPS for better precision
+    // Frame rate options: 0x00=50 FPS (better precision), 0x01=100 FPS (sensor default), 0x02=250 FPS (faster updates, worse precision)
+    uint8_t frame_rate_cmd[] = {
+        DTS6012M_FRAME_HEADER,      // 0xA5
+        DTS6012M_DEVICE_ID,         // 0x03
+        DTS6012M_DEVICE_TYPE,       // 0x20
+        DTS6012M_CMD_SET_FRAME_RATE,// 0x1A
+        0x00,                       // reserved
+        0x00, 0x01,                 // length = 1 (big-endian)
+        0x00                        // frame rate: 0x00 = 50 FPS
+    };
+    uint16_t crc = calc_crc_modbus(frame_rate_cmd, sizeof(frame_rate_cmd));
+    uart->write(frame_rate_cmd, sizeof(frame_rate_cmd));
+    uart->write(uint8_t(crc >> 8));  // high byte first
+    uart->write(uint8_t(crc & 0xFF));
+    
+    // read and discard the frame rate response (10 bytes: 7 header + 1 length + 1 data + 2 CRC)
+    // use a small timeout to avoid blocking if sensor doesn't respond
+    // uint8_t response[10];
+    // uint8_t bytes_read = 0;
+    // uint32_t start = AP_HAL::millis();
+    // while (bytes_read < 10 && AP_HAL::millis() - start < 50) {
+    //     int16_t n = uart->read(&response[bytes_read], 10 - bytes_read);
+    //     if (n > 0) {
+    //         bytes_read += n;
+    //     } else {
+    //         hal.scheduler->delay_microseconds(100);
+    //     }
+    // }
+#endif
+    // wait for sensor to process                                                                                       │
+    // hal.scheduler->delay(100); 
+
+    // Send START_STREAM command to begin measurements
     static const uint8_t cmd[] = {
         DTS6012M_FRAME_HEADER,  // 0xA5
         DTS6012M_DEVICE_ID,     // 0x03
@@ -57,7 +93,7 @@ void AP_RangeFinder_DTS6012M::send_start_command()
     };
 
     // calculate CRC over the command bytes
-    const uint16_t crc = calc_crc_modbus(cmd, sizeof(cmd));
+    uint16_t crc = calc_crc_modbus(cmd, sizeof(cmd));
 
     uart->write(cmd, sizeof(cmd));
     // CRC is sent high byte first per protocol spec
@@ -156,7 +192,7 @@ bool AP_RangeFinder_DTS6012M::get_reading(float &reading_m)
     got_reading = true;
 
     if (dist_mm == DTS6012M_DIST_INVALID || dist_mm > DTS6012M_DIST_MAX_MM) {
-        reading_m = max_distance() + 1.0f;
+        reading_m = max_distance_cm() / 100.0f + 1.0f;
         return true;
     }
 
