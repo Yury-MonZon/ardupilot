@@ -48,6 +48,9 @@ extern const AP_HAL::HAL& hal;
 */
 void AP_RangeFinder_DTS6012M::send_start_command()
 {
+    // reset buffer state for fresh start
+    linebuf_len = 0;
+
 #if 0
     // Set frame rate to 50 FPS for better precision
     // Frame rate options: 0x00=50 FPS (better precision), 0x01=100 FPS (sensor default), 0x02=250 FPS (faster updates, worse precision)
@@ -126,6 +129,12 @@ bool AP_RangeFinder_DTS6012M::get_reading(float &reading_m)
 {
     if (uart == nullptr) {
         return false;
+    }
+
+    // reset got_reading flag if we haven't received data in a while,
+    // allowing re-initialization if sensor stops streaming due to EMI or glitch
+    if (got_reading && AP_HAL::millis() - state.last_reading_ms > 500) {
+        got_reading = false;
     }
 
     // keep sending start command until we receive a valid reading,

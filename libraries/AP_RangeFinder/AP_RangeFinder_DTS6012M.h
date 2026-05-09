@@ -67,6 +67,14 @@ private:
     bool got_reading;
     int8_t _signal_quality_pct = RangeFinder::SIGNAL_QUALITY_UNKNOWN;
 
+    // constructor initializes state
+    AP_RangeFinder_DTS6012M(RangeFinder::RangeFinder_State &_state, AP_RangeFinder_Params &_params)
+        : AP_RangeFinder_Backend_Serial(_state, _params)
+    {
+        linebuf_len = 0;
+        got_reading = false;
+    }
+
     // send start stream command to sensor
     void send_start_command();
 
