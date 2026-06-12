@@ -356,6 +356,46 @@ void Plane::one_second_loop()
     AP_Notify::flags.pre_arm_gps_check = true;
     AP_Notify::flags.armed = arming.is_armed() || arming.arming_required() == AP_Arming::Required::NO;
 
+    // Check if vibration level is critically high (>= 12 m/s/s)
+    if (AP_Notify::flags.flying) {
+        const Vector3f &vibration = ahrs.get_vibration();
+        static uint32_t last_vibe_critical_warn_ms = 0;
+        uint32_t now_ms = AP_HAL::millis();
+        uint8_t vibrations_high = 0;
+
+        if (vibration.x >= 30.0f || vibration.y >= 30.0f || vibration.z >= 30.0f) {
+            vibrations_high = 2;
+        }
+        else if (vibration.x >= 18.0f || vibration.y >= 18.0f || vibration.z >= 18.0f) {
+            vibrations_high = 1;
+        }
+        if (now_ms - last_vibe_critical_warn_ms > 30000) {
+            if (vibrations_high == 2) {
+                GCS_SEND_TEXT(MAV_SEVERITY_ERROR, "Vibration Critical! %.1f/%.1f/%.1f m/s/s",
+                                (double)vibration.x, (double)vibration.y, (double)vibration.z);
+            } else if (vibrations_high == 1) {
+            GCS_SEND_TEXT(MAV_SEVERITY_WARNING, "Vibration High! %.1f/%.1f/%.1f m/s/s",
+                            (double)vibration.x, (double)vibration.y, (double)vibration.z);
+            }
+            last_vibe_critical_warn_ms = now_ms;
+            vibrations_high = 0; // reset flag after warning
+        }
+
+       
+    }
+
+    // Check if EKF reports vibration affecting flight
+    if (AP_Notify::flags.flying && ahrs.is_vibration_affected()) {
+        static uint32_t last_vibe_warn_ms = 0;
+        uint32_t now_ms = AP_HAL::millis();
+        
+        // Only warn every 30 seconds to avoid spam
+        if (now_ms - last_vibe_warn_ms > 30000) {
+            GCS_SEND_TEXT(MAV_SEVERITY_WARNING, "Vibration Danger!");
+            last_vibe_warn_ms = now_ms;
+        }
+    }
+
 #if AP_TERRAIN_AVAILABLE && HAL_LOGGING_ENABLED
     if (should_log(MASK_LOG_GPS)) {
         terrain.log_terrain_data();
