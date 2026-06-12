@@ -53,6 +53,7 @@
 #include <ctype.h>
 #include <GCS_MAVLink/GCS.h>
 #include <AC_Fence/AC_Fence.h>
+   
 
 #if AP_OSD_EXTENDED_LNK_STATS
 // We need to this file to access the CRSF telemetry objects which contains the link stats data
@@ -1683,6 +1684,17 @@ void AP_OSD_Screen::draw_speed(uint8_t x, uint8_t y, float angle_rad, float magn
     }
 }
 
+void AP_OSD_Screen::draw_windspeed(uint8_t x, uint8_t y, float angle_rad, float magnitude)
+{
+    int32_t angle_cd = angle_rad * DEGX100;
+    char arrow = get_arrow_font_index(angle_cd);
+    if (u_scale(VSPEED, magnitude) < 9.95) {
+        backend->write(x, y, false, "%c %1.1f%c", arrow, u_scale(VSPEED, magnitude), u_icon(VSPEED));
+    } else {
+        backend->write(x, y, false, "%c%3d%c", arrow, (int)roundf(u_scale(VSPEED, magnitude)), u_icon(VSPEED));
+    }
+}
+
 void AP_OSD_Screen::draw_gspeed(uint8_t x, uint8_t y)
 {
     AP_AHRS &ahrs = AP::ahrs();
@@ -1949,7 +1961,7 @@ void AP_OSD_Screen::draw_wind(uint8_t x, uint8_t y)
         }
         angle = angle + atan2f(v.y, v.x) - ahrs.get_yaw();
     } 
-    draw_speed(x + 1, y, angle, length);
+    draw_windspeed(x + 1, y, angle, length);
 
 #else
     const AP_WindVane* windvane = AP_WindVane::get_singleton();
@@ -1964,11 +1976,24 @@ void AP_OSD_Screen::draw_wind(uint8_t x, uint8_t y)
 void AP_OSD_Screen::draw_aspeed(uint8_t x, uint8_t y)
 {
     float aspd = 0.0f;
+    static uint8_t cnt = 0;
     AP_AHRS &ahrs = AP::ahrs();
     WITH_SEMAPHORE(ahrs.get_semaphore());
     bool have_estimate = ahrs.airspeed_estimate(aspd);
     if (have_estimate) {
         backend->write(x, y, false, "%c%4d%c", SYMBOL(SYM_ASPD), (int)u_scale(SPEED, aspd), u_icon(SPEED));
+        if (AP_Notify::flags.flying)
+        {
+            if (aspd <= AP::vehicle()->get_airspeed_stall()) // plane.aparm.airspeed_stall 
+            {
+                if (cnt == 0)
+                {
+                    GCS_SEND_TEXT(MAV_SEVERITY_WARNING, "Stall speed!");
+                }
+                cnt = (cnt + 1) % 10;   // keep updates to 1 per second
+            }
+            else cnt = 0;
+        }
     } else {
         backend->write(x, y, false, "%c ---%c", SYMBOL(SYM_ASPD), u_icon(SPEED));
     }

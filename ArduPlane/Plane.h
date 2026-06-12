@@ -1078,6 +1078,7 @@ private:
     void disarm_if_autoland_complete();
     bool trigger_land_abort(const float climb_to_alt_m);
     void get_osd_roll_pitch_rad(float &roll, float &pitch) const override;
+    float get_airspeed_stall() const override;
     float tecs_hgt_afe(void);
     void efi_update(void);
     void get_scheduler_tasks(const AP_Scheduler::Task *&tasks,
