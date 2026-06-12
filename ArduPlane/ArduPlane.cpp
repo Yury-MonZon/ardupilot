@@ -1072,7 +1072,7 @@ void Plane::get_osd_roll_pitch_rad(float &roll, float &pitch) const
 
 float Plane::get_airspeed_stall() const
 {
-    return aparm.airspeed_stall * 0.01f;
+    return aparm.airspeed_stall;
 }
 
 /*
