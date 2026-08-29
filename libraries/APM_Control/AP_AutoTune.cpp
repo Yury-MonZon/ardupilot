@@ -48,6 +48,12 @@ extern const AP_HAL::HAL& hal;
 // turbulence gust, a rough doublet) permanently lowering the ceiling
 #define AUTOTUNE_OSC_CONFIRM 2
 
+// cooldown after one axis releases the cross-axis event lock, before
+// another axis may acquire it - guards against residual coupled
+// motion (e.g. a dutch-roll tail after a roll doublet) right after
+// the other axis's event ends
+#define AUTOTUNE_AXIS_COOLDOWN_MS 300
+
 // time constant of rate trim loop
 #define TRIM_TCONST 1.0f
 
@@ -61,6 +67,9 @@ AP_AutoTune::AP_AutoTune(ATGains &_gains, ATType _type,
     aparm(parms),
     ff_filter(3)
 {}
+
+int8_t AP_AutoTune::active_axis_type = -1;
+uint32_t AP_AutoTune::active_axis_release_ms = 0;
 
 #if CONFIG_HAL_BOARD == HAL_BOARD_SITL
 #include <stdio.h>
@@ -149,6 +158,12 @@ void AP_AutoTune::stop(void)
 {
     if (running) {
         running = false;
+        if (active_axis_type == int8_t(type)) {
+            // don't leave a mid-event exit wedging the lock and
+            // blocking other axes
+            active_axis_type = -1;
+            active_axis_release_ms = AP_HAL::millis();
+        }
         if (is_positive(D_limit) && is_positive(P_limit)) {
             save_gains();
         } else {
@@ -303,6 +318,18 @@ void AP_AutoTune::update(AP_PIDInfo &pinfo, float scaler, float angle_err_deg)
     }
 
     if (new_state != ATState::IDLE) {
+        if (active_axis_type >= 0 && active_axis_type != int8_t(type)) {
+            // another axis is currently mid-maneuver; treat this as
+            // coupled motion rather than a genuine demand on this axis
+            return;
+        }
+        if (active_axis_type < 0 &&
+            now - active_axis_release_ms < AUTOTUNE_AXIS_COOLDOWN_MS) {
+            // still cooling down after another axis released the lock;
+            // this may still be residual coupled motion
+            return;
+        }
+        active_axis_type = int8_t(type);
         // starting an event
         min_actuator = max_actuator = min_rate = max_rate = 0;
         state_enter_ms = now;
@@ -493,6 +520,12 @@ void AP_AutoTune::update(AP_PIDInfo &pinfo, float scaler, float angle_err_deg)
  */
 void AP_AutoTune::state_change(ATState new_state)
 {
+    if (new_state == ATState::IDLE && active_axis_type == int8_t(type)) {
+        // release the cross-axis lock so another axis can capture an
+        // event, after a settling cooldown
+        active_axis_type = -1;
+        active_axis_release_ms = AP_HAL::millis();
+    }
     min_Dmod = 1;
     max_Dmod = 0;
     max_SRate_P = 1;

@@ -161,4 +161,15 @@ private:
     // number of consecutive events showing oscillation, required to
     // reach AUTOTUNE_OSC_CONFIRM before a gain cut is committed
     uint8_t osc_streak;
+
+    // which axis (if any) is currently mid-maneuver (DEMAND_POS/NEG).
+    // Shared across all AP_AutoTune instances (roll/pitch/yaw) so a
+    // doublet on one axis can't have coupled motion on another axis
+    // mistaken for that axis's own tuning data. -1 means no axis active.
+    static int8_t active_axis_type;
+
+    // time the lock was last released, so a brief settling/cooldown
+    // period can be enforced before another axis is allowed to start
+    // an event on what may still be residual coupled motion
+    static uint32_t active_axis_release_ms;
 };
