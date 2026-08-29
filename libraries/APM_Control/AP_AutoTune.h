@@ -157,4 +157,8 @@ private:
     uint32_t D_set_ms;
     uint32_t P_set_ms;
     uint8_t done_count;
+
+    // number of consecutive events showing oscillation, required to
+    // reach AUTOTUNE_OSC_CONFIRM before a gain cut is committed
+    uint8_t osc_streak;
 };

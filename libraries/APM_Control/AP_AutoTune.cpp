@@ -43,6 +43,11 @@ extern const AP_HAL::HAL& hal;
 // ratio of I to P
 #define AUTOTUNE_I_RATIO 0.75
 
+// number of consecutive events that must show oscillation before we
+// commit to a gain cut, to reject a one-off spurious trigger (a
+// turbulence gust, a rough doublet) permanently lowering the ceiling
+#define AUTOTUNE_OSC_CONFIRM 2
+
 // time constant of rate trim loop
 #define TRIM_TCONST 1.0f
 
@@ -121,6 +126,7 @@ void AP_AutoTune::start(void)
     D_set_ms = 0;
     P_set_ms = 0;
     done_count = 0;
+    osc_streak = 0;
 
     if (!is_positive(rpid.slew_limit())) {
         // we must have a slew limit, default to 150 deg/s
@@ -350,9 +356,18 @@ void AP_AutoTune::update(AP_PIDInfo &pinfo, float scaler, float angle_err_deg)
         P *= 0.5;
     }
 
-    // see if the slew limiter kicked in
-    if (min_Dmod < 1.0 && !is_positive(D_limit)) {
+    // see if the slew limiter kicked in. Require the oscillation to
+    // reproduce on AUTOTUNE_OSC_CONFIRM consecutive events before we
+    // commit to a permanent gain cut - a single spurious reading
+    // (turbulence, a rough doublet) would otherwise lock in an overly
+    // conservative D_limit/P_limit ceiling with no way to recover
+    const bool osc_seen = (min_Dmod < 1.0);
+    osc_streak = osc_seen ? (osc_streak + 1) : 0;
+    const bool osc_confirmed = osc_streak >= AUTOTUNE_OSC_CONFIRM;
+
+    if (osc_confirmed && !is_positive(D_limit)) {
         // oscillation, without D_limit set
+        osc_streak = 0;
         if (max_P > 0.5 * max_D) {
             // lower P and D to get us to a non-oscillating state
             P *= 0.35;
@@ -366,8 +381,9 @@ void AP_AutoTune::update(AP_PIDInfo &pinfo, float scaler, float angle_err_deg)
             action = Action::LOWER_D;
             GCS_SEND_TEXT(MAV_SEVERITY_ERROR, "%sD: %.4f", axis_string(), D_limit);
         }
-    } else if (min_Dmod < 1.0) {
+    } else if (osc_confirmed) {
         // oscillation, with D_limit set
+        osc_streak = 0;
         if (now - D_set_ms > 2000) {
             // leave 2s for Dmod to settle after lowering D
             if (max_D > 0.8 * max_P) {
@@ -395,6 +411,12 @@ void AP_AutoTune::update(AP_PIDInfo &pinfo, float scaler, float angle_err_deg)
                 GCS_SEND_TEXT(MAV_SEVERITY_ERROR, "%sP: %.4f", axis_string(), P_limit);
             }
         }
+    } else if (osc_seen) {
+        // oscillation seen but not yet confirmed on a second consecutive
+        // event - hold gains steady this cycle rather than cutting or
+        // raising; a fluke will be followed by a clean event and never
+        // reach osc_confirmed, a real oscillation reproduces immediately
+        action = Action::NONE;
     } else if (ff_count < 6) {
         // we don't have a good FF estimate yet, keep going
 
